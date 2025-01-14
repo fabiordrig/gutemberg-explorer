@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,13 +16,22 @@ export default function BookDetails() {
   const { id } = params;
   const [userBook, setUserBook] = useState<UserBook | null>(null);
   const [loading, setLoading] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchBook() {
+      const existentId = localStorage.getItem("userId");
+
+      if (!existentId) {
+        const newUserId = Math.random().toString(36).substring(7);
+
+        setUserId(newUserId);
+        localStorage.setItem("userId", newUserId);
+      }
       try {
         setLoading(true);
         const response = await fetch(`/api/books/${id}`, {
-          headers: { "x-user-id": "demo-user" },
+          headers: { "x-user-id": userId! },
         });
         const data: UserBook = await response.json();
 

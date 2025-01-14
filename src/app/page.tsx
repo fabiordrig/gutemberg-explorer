@@ -16,13 +16,30 @@ export default function MainPage() {
   const [bookId, setBookId] = useState("");
   const [books, setBooks] = useState<UserBook[]>([]);
   const [loading, setLoading] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
   async function fetchBooks() {
-    const response = await fetch("/api/books", {
-      headers: { "x-user-id": "demo-user" },
-    });
-    const data: UserBook[] = await response.json();
-    setBooks(data);
+    try {
+      const id = localStorage.getItem("userId");
+
+      if (!id) {
+        const newUserId = Math.random().toString(36).substring(7);
+
+        setUserId(newUserId);
+        localStorage.setItem("userId", newUserId);
+      }
+
+      setLoading(true);
+      const response = await fetch("/api/books", {
+        headers: { "x-user-id": userId! },
+      });
+      const data: UserBook[] = await response.json();
+      setBooks(data);
+    } catch (error) {
+      console.error("Error fetching books:", error);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -38,7 +55,7 @@ export default function MainPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-user-id": "demo-user",
+          "x-user-id": userId!,
         },
         body: JSON.stringify({ bookId }),
       });
@@ -52,6 +69,15 @@ export default function MainPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+        <p className="ml-4 text-lg font-medium">Loading books...</p>
+      </div>
+    );
   }
 
   return (
@@ -71,26 +97,41 @@ export default function MainPage() {
           {loading ? "Searching..." : "Search"}
         </Button>
       </div>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {books.map((userBook) => (
-          <Card key={userBook.id} className="shadow-lg">
-            <CardHeader>
-              <h2 className="text-xl font-bold">{userBook.book.title}</h2>
-              <p className="text-sm text-gray-500">By {userBook.book.author}</p>
-            </CardHeader>
-            <CardContent>
-              <p className="whitespace-pre-line text-gray-700">
-                {userBook.book.summary ?? "No summary available."}
-              </p>
-            </CardContent>
-            <CardFooter>
-              <Link href={`/${userBook.bookId}`} className="btn btn-secondary">
-                View Details
-              </Link>
-            </CardFooter>
+      {!!books.length ? (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {books.map((userBook) => (
+            <Card key={userBook.id} className="shadow-lg">
+              <CardHeader>
+                <h2 className="text-xl font-bold">{userBook.book.title}</h2>
+                <p className="text-sm text-gray-500">
+                  By {userBook.book.author}
+                </p>
+              </CardHeader>
+              <CardContent>
+                <p className="whitespace-pre-line text-gray-700">
+                  {userBook.book.summary ?? "No summary available."}
+                </p>
+              </CardContent>
+              <CardFooter>
+                <Link
+                  href={`/${userBook.bookId}`}
+                  className="btn btn-secondary"
+                >
+                  View Details
+                </Link>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="flex min-h-[50vh] items-center justify-center">
+          <Card className="p-8 text-center shadow-lg">
+            <p className="text-lg font-medium text-gray-500">
+              No books found. Try adding a book using its ID.
+            </p>
           </Card>
-        ))}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
