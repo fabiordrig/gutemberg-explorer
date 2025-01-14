@@ -1,29 +1,23 @@
-# Create T3 App
+# Gutenberg Explorer
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+Gutenberg Explorer is a web application that allows users to explore and manage books from the [Project Gutenberg](https://www.gutenberg.org/) library. Users can search for books by their ID, view details like summaries and key characters, and download the book content.
 
-## What's next? How do I make an app with this?
+---
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+## 🚀 Features
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+- **Book Search**: Enter a Project Gutenberg book ID to save it to your collection.
+- **Book Management**: View a list of books saved by the user.
+- **Book Details**: Display the book's summary, key characters, and allow downloads.
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+---
 
-## Learn More
+## 🛠️ Technology Stack
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
-
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
-
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
-
-## How do I deploy this?
-
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+- **Framework**: [Next.js](https://nextjs.org/) 15
+- **Styling**: [TailwindCSS](https://tailwindcss.com/) and [ShadCN UI](https://shadcn.dev/)
+- **Database**: [Prisma](https://www.prisma.io/) with PostgreSQL
+- **API Integration**: [Gutendex API](https://gutendex.com/)
+- **State Management**: React Hooks
+- **Type Safety**: TypeScript
+- **Linting & Formatting**: ESLint and Prettier

@@ -1,10 +1,12 @@
-import openai from "@/lib/ai";
+import { AIHandlers } from "@/lib/handlers/ai";
+import { BookHandlers } from "@/lib/handlers/books";
 import { type GutendexResponse } from "@/lib/types";
-import { db } from "@/server/db";
 import axios from "axios";
 import { NextResponse } from "next/server";
 
-// Base URL for Gutendex API
+const booksHandler = new BookHandlers();
+const aiHandler = new AIHandlers();
+
 const GUTENDEX_BASE_URL = "https://gutendex.com/books";
 
 export async function POST(req: Request) {
@@ -15,7 +17,7 @@ export async function POST(req: Request) {
 
     if (!bookId || !userId) {
       return NextResponse.json(
-        { error: "Book ID is required." },
+        { error: "Book ID and User ID are required." },
         { status: 400 },
       );
     }
@@ -25,62 +27,25 @@ export async function POST(req: Request) {
     );
     const bookData = response.data;
 
-    const bookContentResponse = await axios.get(
+    const bookContentResponse = await axios.get<string>(
       bookData.formats["text/plain; charset=us-ascii"]!,
     );
-
     const bookContent = bookContentResponse.data;
     const subBookContent = bookContent.substring(0, 16385);
 
-    const prompt = `
-    Identify the summary of the book "${bookData.title}" and the key characters based on this text: ${subBookContent}.
+    const { summary, characters } =
+      await aiHandler.generateBookSummaryAndCharacters(
+        bookData.title,
+        subBookContent,
+      );
 
-    Answer always on this JSON format:
-
-      {
-      "summary": "The summary of the book", /// Summary with a maximum of 500 characters
-      "characters": "Character 1, Character 2, "Character 3"
-      }
-    `;
-
-    /// Identifying the summary of the book and the key characters
-    const aiResponse = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [
-        {
-          role: "system",
-          content: prompt,
-        },
-      ],
-    });
-
-    const content = aiResponse.choices[0]?.message?.content ?? "";
-
-    let parsedContent: { summary?: string; characters?: string };
-    try {
-      parsedContent = JSON.parse(content);
-    } catch {
-      throw new Error("Invalid AI response format");
-    }
-
-    const savedBook = await db.book.create({
-      data: {
-        title: bookData.title,
-        author: bookData.authors?.[0]?.name ?? "Unknown",
-        publicationYear: bookData?.publication_year ?? null,
-        metadata: JSON.parse(JSON.stringify(bookData)),
-        content: bookContent,
-        summary: parsedContent.summary ?? null,
-        keyCharacters: parsedContent.characters ?? null,
-      },
-    });
-
-    await db.userBooks.create({
-      data: {
-        userId: userId,
-        bookId: savedBook.id,
-      },
-    });
+    const savedBook = await booksHandler.saveBook(
+      userId,
+      bookData,
+      bookContent,
+      summary,
+      characters,
+    );
 
     return NextResponse.json({
       message: "Book saved successfully",
@@ -106,14 +71,8 @@ export async function GET(req: Request) {
       );
     }
 
-    const books = await db.userBooks.findMany({
-      where: {
-        userId,
-      },
-      include: {
-        book: true,
-      },
-    });
+    const books = await booksHandler.getBooksByUser(userId);
+
     return NextResponse.json(books);
   } catch (error) {
     console.error("Error fetching books:", error);

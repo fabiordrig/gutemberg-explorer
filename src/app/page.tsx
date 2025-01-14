@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -18,20 +19,21 @@ export default function MainPage() {
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
 
-  async function fetchBooks() {
+  const fetchBooks = async () => {
     try {
       const id = localStorage.getItem("userId");
 
       if (!id) {
         const newUserId = Math.random().toString(36).substring(7);
-
         setUserId(newUserId);
         localStorage.setItem("userId", newUserId);
+      } else {
+        setUserId(id);
       }
 
       setLoading(true);
       const response = await fetch("/api/books", {
-        headers: { "x-user-id": userId! },
+        headers: { "x-user-id": id ?? userId! },
       });
       const data: UserBook[] = await response.json();
       setBooks(data);
@@ -40,17 +42,16 @@ export default function MainPage() {
     } finally {
       setLoading(false);
     }
-  }
-
+  };
   useEffect(() => {
     void fetchBooks();
-  }, []);
+  }, [userId]);
 
-  async function handleSearch() {
+  const handleSearch = async () => {
+    if (!bookId) return;
+
     try {
-      if (!bookId) return;
       setLoading(true);
-
       const response = await fetch("/api/books", {
         method: "POST",
         headers: {
@@ -69,16 +70,7 @@ export default function MainPage() {
     } finally {
       setLoading(false);
     }
-  }
-
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-        <p className="ml-4 text-lg font-medium">Loading books...</p>
-      </div>
-    );
-  }
+  };
 
   return (
     <div className="container mx-auto py-8">
@@ -122,6 +114,11 @@ export default function MainPage() {
               </CardFooter>
             </Card>
           ))}
+        </div>
+      ) : loading ? (
+        <div className="flex min-h-[50vh] items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+          <p className="ml-4 text-lg font-medium">Loading books...</p>
         </div>
       ) : (
         <div className="flex min-h-[50vh] items-center justify-center">

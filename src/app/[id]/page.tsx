@@ -31,7 +31,7 @@ export default function BookDetails() {
       try {
         setLoading(true);
         const response = await fetch(`/api/books/${id}`, {
-          headers: { "x-user-id": userId! },
+          headers: { "x-user-id": userId ?? existentId! },
         });
         const data: UserBook = await response.json();
 
@@ -48,9 +48,13 @@ export default function BookDetails() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-        <p className="ml-4 text-lg font-medium">Loading book details...</p>
+      <div className="container mx-auto py-8">
+        <Card className="shadow-lg">
+          <div className="flex min-h-screen items-center justify-center">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+            <p className="ml-4 text-lg font-medium">Loading book details...</p>
+          </div>
+        </Card>
       </div>
     );
   }

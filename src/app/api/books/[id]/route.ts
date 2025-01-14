@@ -1,36 +1,31 @@
-import { db } from "@/server/db";
+import { BookHandlers } from "@/lib/handlers/books";
 import { NextResponse } from "next/server";
+
+const booksHandler = new BookHandlers();
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const userId = req.headers.get("x-user-id");
 
     if (!userId) {
-      console.log("User ID is required.", userId);
+      console.error("User ID is required.", userId);
       return NextResponse.json(
         { error: "User ID is required." },
         { status: 400 },
       );
     }
 
-    const id = parseInt(params.id);
+    const { id } = await params;
+    const bookId = parseInt(id);
 
-    if (isNaN(id)) {
+    if (isNaN(bookId)) {
       return NextResponse.json({ error: "Invalid book ID." }, { status: 400 });
     }
 
-    const books = await db.userBooks.findUnique({
-      where: {
-        userId,
-        id,
-      },
-      include: {
-        book: true,
-      },
-    });
+    const books = await booksHandler.getBookByUserAndId(userId, bookId);
 
     return NextResponse.json(books);
   } catch (error) {
