@@ -14,11 +14,12 @@ model Book {
   author          String?
   publicationYear Int?
   metadata        Json
+  summary         String?
+  keyCharacters   String?
   content         String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  analyses  Analysis[]
   UserBooks UserBooks[]
 }
 
@@ -27,16 +28,6 @@ model UserBooks {
   userId       String
   bookId       Int
   lastAccessed DateTime @default(now())
-
-  book Book @relation(fields: [bookId], references: [id])
-}
-
-model Analysis {
-  id        Int      @id @default(autoincrement())
-  bookId    Int
-  type      String
-  result    Json
-  createdAt DateTime @default(now())
 
   book Book @relation(fields: [bookId], references: [id])
 }
