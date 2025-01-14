@@ -14,7 +14,6 @@ export default function BookDetails() {
   const params = useParams<{ id: string }>();
   const { id } = params;
   const [userBook, setUserBook] = useState<UserBook | null>(null);
-
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -38,11 +37,23 @@ export default function BookDetails() {
   }, [id]);
 
   if (loading) {
-    return <p>Loading...</p>;
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+        <p className="ml-4 text-lg font-medium">Loading book details...</p>
+      </div>
+    );
   }
 
   if (!userBook) {
-    return <p>Book not found.</p>;
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-lg font-medium text-red-500">
+          Sorry, we couldn’t find the book you were looking for. Please try
+          another book ID.
+        </p>
+      </div>
+    );
   }
 
   return (
@@ -51,6 +62,10 @@ export default function BookDetails() {
         <CardHeader>
           <h1 className="mb-4 text-4xl font-bold">{userBook.book.title}</h1>
           <p className="text-sm text-gray-500">By {userBook.book.author}</p>
+          <h2 className="mb-2 text-lg font-semibold">Summary</h2>
+          <p className="mb-4 text-gray-700">{userBook.book.summary}</p>
+          <h2 className="mb-2 text-lg font-semibold">Key Characters</h2>
+          <p className="mb-4 text-gray-700">{userBook.book.keyCharacters}</p>
         </CardHeader>
         <CardContent>
           <p className="mb-4 text-gray-700">{userBook.book.content}</p>

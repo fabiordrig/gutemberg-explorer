@@ -84,10 +84,7 @@ export default function MainPage() {
               </p>
             </CardContent>
             <CardFooter>
-              <Link
-                href={`/book/${userBook.bookId}`}
-                className="btn btn-secondary"
-              >
+              <Link href={`/${userBook.bookId}`} className="btn btn-secondary">
                 View Details
               </Link>
             </CardFooter>
