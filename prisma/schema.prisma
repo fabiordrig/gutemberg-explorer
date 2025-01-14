@@ -1,0 +1,42 @@
+// Prisma Schema for Project Gutenberg Explorer
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Book {
+  id              Int      @id @default(autoincrement())
+  title           String
+  author          String?
+  publicationYear Int?
+  metadata        Json
+  content         String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  analyses  Analysis[]
+  UserBooks UserBooks[]
+}
+
+model UserBooks {
+  id           Int      @id @default(autoincrement())
+  userId       String
+  bookId       Int
+  lastAccessed DateTime @default(now())
+
+  book Book @relation(fields: [bookId], references: [id])
+}
+
+model Analysis {
+  id        Int      @id @default(autoincrement())
+  bookId    Int
+  type      String
+  result    Json
+  createdAt DateTime @default(now())
+
+  book Book @relation(fields: [bookId], references: [id])
+}
